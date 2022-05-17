@@ -14,3 +14,4 @@ fn main() {
      io::stdin()
         .read_line(&mut option)
         .expect("Failed to read line");
+}
