@@ -1,99 +1,120 @@
-// use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
-// struct Pair<T> {
-//     x: T,
-//     y: T,
-// }
+pub trait Summary {
+    fn summarize(&self) -> String {
+        format!("Read more..{}", self.summarize_author())
+    }
+    fn summarize_author(&self) -> String;
 
-// impl<T> Pair<T> {
-//     fn new(x: T, y: T) -> Self {
-//         Pair { x, y }
-//     }
-// }
+    fn notify<T: Summary>(item: T) {
+        println!("Breaking News {}", item.summarize());
+    }
 
-// // Todos los que implementen Display pueden usar ToString
-// // , la biblioteca estándar implementa el trait ToString en cualquier tipo que implemente el trait Display
-// // impl<T: Display> ToString for T {
-// //     // --snip--
-// // }
+    fn notify_1(item: &impl Summary, item2: &impl Summary) {
+        println!("Breaking News {}", item.summarize());
+        println!("Breaking News {}", item2.summarize());
+    }
 
-// // Solo para los que implementen display y partialord
-// //pueden usar el metodo cmp_display
-// impl<T: Display + PartialOrd> Pair<T> {
-//     fn cmp_display(&self) {
-//         if self.x >= self.y {
-//             println!("El largest number is x= {}", self.x);
-//         } else {
-//             println!("El largest number is y= {}", self.y);
-//         }
-//     }
-// }
+    fn notify_3(item: &(impl Summary + Display)) {
+        println!("{}", item.summarize());
+    }
 
-// fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
-//     if x.len() > y.len() {
-//         x
-//     } else {
-//         y
-//     }
-// }
+    fn some_function<T, U>(t: T, u: U) -> i32
+    where
+        T: Display + Clone,
+        U: Clone + Debug;
 
-use std::fmt::Display;
+    fn some_function_1<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32;
+}
 
 #[derive(Debug)]
-struct ImportantExcerpt<'a> {
-    part: &'a str,
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
 }
-
-impl<'a> ImportantExcerpt<'a> {
-    fn level(&self) -> i32 {
-        3
+impl Summary for NewsArticle {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.author)
     }
 
-    fn announce_and_return_part(&self, announce: &str) -> &str {
-        println!("Attention please:{}", announce);
-        self.part
-    }
-}
-
-fn longest_with_an_announcement<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str
-where
-    T: Display,
-{
-    println!("Announcement! {}", ann);
-
-    if x.len() > y.len() {
-       return  x
-    }
+    fn some_function<T, U>(t: T, u: U) -> i32
+    where
+        T: Display + Clone,
+        U: Clone + Debug,
     {
-        y
+        todo!()
+    }
+
+    fn some_function_1<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {
+        todo!()
+    }
+
+    // fn summarize(&self) -> String {
+    //     format!("{}, by {} ({})", self.headline, self.author, self.location)
+    // }
+}
+
+#[derive(Debug)]
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+impl Tweet {
+    pub fn returns_summarizable(&self) -> impl Summary {
+        Tweet {
+            username: String::from("horse_ebooks"),
+            content: String::from("of course, as you probably already know, people"),
+            reply: false,
+            retweet: false,
+        }
     }
 }
 
+impl Summary for Tweet {
+    // fn summarize(&self) -> String {
+    //     format!("{}: {}", self.username, self.content)
+    // }
+
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+
+    fn some_function<T, U>(t: T, u: U) -> i32
+    where
+        T: Display + Clone,
+        U: Clone + Debug,
+    {
+        todo!()
+    }
+
+    fn some_function_1<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {
+        todo!()
+    }
+}
 fn main() {
-    let novel = String::from("Call me Ishmael. Some years ago...");
-
-    let first_sentence = novel.split('.').next().expect("Could not find a '.'");
-
-    let i = ImportantExcerpt {
-        part: first_sentence,
+    let tweet = Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from("of course, as you probably already know, people"),
+        reply: false,
+        retweet: false,
     };
 
-    println!("{:?}", i);
+    println!("1 new tweet {}", tweet.summarize());
+    // println!("{:#?}",tweet.returns_summarizable());
 
-    let s: &'static str = "I have a static lifetime";
-    // let x = 5;
-    // // {
-    // //     r= &x;
-    // // }
-    // let r = &x;
+    let article = NewsArticle {
+        headline: String::from("Penguins win the stanley  cup championship!"),
+        location: String::from("Pittsburgh, PA, USA"),
+        author: String::from("Iceburgh"),
+        content: String::from(
+            "The Pittsburgh Penguins once again are the best hockey team in the NHL.",
+        ),
+    };
 
-    // println!("{}", r);
-
-    // let str1 = String::from("Hello world");
-    // let result;
-    // {
-    //     let str2 = String::from("Hello World!!");
-    //     result = longest(str1.as_str(), &str2);
-    // }
-    // println!("{}", result);
+    println!("{:?}", article);
 }
